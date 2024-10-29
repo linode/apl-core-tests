@@ -3,6 +3,16 @@ entries:
   apl-test:
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2024-10-29T14:18:30.021881804Z"
+    description: A Helm chart for Kubernetes
+    digest: d81eec69dee76307fd0465ce0f8ec44b378acaa95420cf711926e0314b0096ac
+    name: apl-test
+    type: application
+    urls:
+    - https://github.com/linode/apl-core-tests/releases/download/apl-test-0.1.2/apl-test-0.1.2.tgz
+    version: 0.1.2
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2024-10-29T13:14:15.20465346Z"
     description: A Helm chart for Kubernetes
     digest: 0c6191672c2a6d90791493e8c891e37dbd1efccf533fa3cc811f9c8a3ba26bb2
@@ -11,4 +21,4 @@ entries:
     urls:
     - https://github.com/linode/apl-core-tests/releases/download/apl-test-0.1.1/apl-test-0.1.1.tgz
     version: 0.1.1
-generated: "2024-10-29T13:14:15.204664531Z"
+generated: "2024-10-29T14:18:30.021893906Z"
