@@ -1,1 +1,3 @@
 fullnameOverride: "apl"
+# Wait in seconds before installation job completes
+wait: 10
