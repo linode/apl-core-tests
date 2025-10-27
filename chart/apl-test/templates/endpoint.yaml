@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: oauth2-proxy
+  namespace: istio-system
+subsets:
+  - addresses:
+      - ip: 10.0.0.1
+    ports:
+      - port: 4180
