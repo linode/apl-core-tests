@@ -14,4 +14,4 @@ spec:
       containers:
         - name: busybox
           image: busybox
-          command: [sleep, '10']
+          command: [sleep, '{{ .Values.wait }}']
