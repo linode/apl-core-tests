@@ -11,4 +11,3 @@ endpoints:
     conditions:
       ready: true
 addressType: IPv4
-
