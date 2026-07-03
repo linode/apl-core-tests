@@ -186,3 +186,63 @@ Tags a locally-cached Docker image and pushes it to Docker Hub under `<DOCKER_RE
 | `LOCAL_CACHE_IMAGE` | — | Local image reference to tag from |
 | `DOCKER_REPO` | `linode/apl-core` | Docker Hub repository |
 | `DRY_RUN` | `false` | Print commands without executing |
+
+---
+
+## Triggering workflows manually
+
+Both release workflows accept `workflow_dispatch` inputs and can be triggered from the CLI with `gh workflow run`.
+
+### Cut Release Branch
+
+Creates a new `releases/vMAJOR.MINOR` branch from the specified base and pushes it.
+
+```sh
+# Dry run — derives and validates the branch name without pushing
+gh workflow run cut-release-branch.yml \
+  -f bump_type=minor \
+  -f base_branch=main \
+  -f dry_run=true
+
+# Cut a minor release branch for real
+gh workflow run cut-release-branch.yml \
+  -f bump_type=minor \
+  -f base_branch=main \
+  -f dry_run=false
+
+# Cut a major release branch for real
+gh workflow run cut-release-branch.yml \
+  -f bump_type=major \
+  -f base_branch=main \
+  -f dry_run=false
+```
+
+### Release from Branch
+
+Tags and publishes a release (RC or stable) from an existing `releases/*` branch.
+
+```sh
+# Dry run — computes the tag and validates without writing anything
+gh workflow run release-from-branch.yml \
+  -f release_branch=releases/v1.4 \
+  -f is_prerelease=true \
+  -f dry_run=true
+
+# Cut an RC tag (e.g. v1.4.0-rc.1)
+gh workflow run release-from-branch.yml \
+  -f release_branch=releases/v1.4 \
+  -f is_prerelease=true \
+  -f dry_run=false
+
+# Promote the highest RC to a stable release (e.g. v1.4.0)
+gh workflow run release-from-branch.yml \
+  -f release_branch=releases/v1.4 \
+  -f is_prerelease=false \
+  -f dry_run=false
+```
+
+To watch the run after triggering it:
+
+```sh
+gh run watch
+```
