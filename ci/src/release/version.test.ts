@@ -252,6 +252,21 @@ describe('computeNextRcTag', () => {
     expect(computeNextRcTag(tags, 'releases/v6.1')).toBe('v6.1.0-rc.1')
   })
 
+  it('starts patch RC from stable+1 when stable exists but no patch RCs yet', () => {
+    const tags = ['v6.1.0']
+    expect(computeNextRcTag(tags, 'releases/v6.1')).toBe('v6.1.1-rc.1')
+  })
+
+  it('starts patch RC from highest stable+1 when multiple stables exist with no patch RCs', () => {
+    const tags = ['v6.1.0', 'v6.1.1']
+    expect(computeNextRcTag(tags, 'releases/v6.1')).toBe('v6.1.2-rc.1')
+  })
+
+  it('increments patch RC even when a stable also exists on the branch', () => {
+    const tags = ['v6.1.0', 'v6.1.1-rc.2', 'v6.1.1-rc.1']
+    expect(computeNextRcTag(tags, 'releases/v6.1')).toBe('v6.1.1-rc.3')
+  })
+
   it('handles patch-level RC after a stable has been cut', () => {
     const tags = ['v6.1.0', 'v6.1.1-rc.1']
     expect(computeNextRcTag(tags, 'releases/v6.1')).toBe('v6.1.1-rc.2')

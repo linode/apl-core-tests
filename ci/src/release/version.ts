@@ -97,8 +97,18 @@ export function computeNextRcTag(branchTags: string[], branchName: string): stri
       return m === major && n === minor
     })
     .sort((a, b) => semver.rcompare(a, b))
-  if (seriesRcs.length === 0) return `v${major}.${minor}.0-rc.1`
-  return `v${incrementRc(stripV(seriesRcs[0]))}`
+  if (seriesRcs.length > 0) return `v${incrementRc(stripV(seriesRcs[0]))}`
+
+  const seriesStables = filterSemver(branchTags)
+    .filter((t) => !t.includes('-rc.'))
+    .filter((t) => {
+      const [m, n] = stripV(t).split('.')
+      return m === major && n === minor
+    })
+    .sort((a, b) => semver.rcompare(a, b))
+  if (seriesStables.length > 0) return `v${nextPatchRc(stripV(seriesStables[0]))}`
+
+  return `v${major}.${minor}.0-rc.1`
 }
 
 export function computeDevVersion(highestTag: string, shortSha: string): string {
