@@ -27,6 +27,7 @@ on:
 env:
   BOT_EMAIL: ${{ vars.BOT_EMAIL }}
   BOT_USERNAME: ${{ vars.BOT_USERNAME }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   cut-release-branch:
@@ -40,7 +41,8 @@ jobs:
         with:
           ref: ${{ inputs.base_branch }}
           fetch-depth: 0
-          token: ${{ secrets.BOT_TOKEN }}
+          token: ${{ env.GITHUB_TOKEN }}
+          
 
       - name: Setup Node
         uses: actions/setup-node@v6
