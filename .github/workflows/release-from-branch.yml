@@ -118,21 +118,21 @@ jobs:
           RELEASE_TAG: ${{ steps.compute-tag.outputs.tag }}
           DRY_RUN: ${{ inputs.dry_run }}
 
-      - name: Login to Docker Hub
-        if: ${{ inputs.dry_run == 'false' }}
-        uses: docker/login-action@v4
-        with:
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_PASSWORD }}
+      # - name: Login to Docker Hub
+      #   if: ${{ inputs.dry_run == 'false' }}
+      #   uses: docker/login-action@v4
+      #   with:
+      #     username: ${{ env.DOCKER_USERNAME }}
+      #     password: ${{ env.DOCKER_PASSWORD }}
 
-      # - name: Push Docker image with release tag
-      #   working-directory: ci
-      #   run: npm run release:docker-push
-      #   env:
-      #     RELEASE_TAG: ${{ steps.compute-tag.outputs.tag }}
-      #     CACHE_IMAGE: ${{ env.LOCAL_CACHE_IMAGE }}
-      #     DOCKER_REPO: ${{ env.REPO }}
-      #     DRY_RUN: ${{ inputs.dry_run }}
+      - name: Push Docker image with release tag
+        working-directory: ci
+        run: npm run release:docker-push
+        env:
+          RELEASE_TAG: ${{ steps.compute-tag.outputs.tag }}
+          CACHE_IMAGE: ${{ env.LOCAL_CACHE_IMAGE }}
+          DOCKER_REPO: ${{ env.REPO }}
+          DRY_RUN: ${{ inputs.dry_run }}
 
       - name: Publish Helm chart
         if: ${{ inputs.dry_run == 'false' }}
