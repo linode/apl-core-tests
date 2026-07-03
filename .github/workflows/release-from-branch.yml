@@ -31,8 +31,8 @@ env:
   LOCAL_CACHE_IMAGE: apl-core-tests:ci-build
   BOT_EMAIL: ${{ vars.BOT_EMAIL }}
   BOT_USERNAME: ${{ vars.BOT_USERNAME }}
-  DOCKER_USERNAME: ${{ vars.DOCKERHUB_LINODEBOT_USERNAME }}
-  DOCKER_PASSWORD: ${{ secrets.DOCKERHUB_LINODEBOT_TOKEN }}
+  DOCKER_USERNAME: linode
+  DOCKER_PASSWORD: ${{secrets.GITHUB_TOKEN}}
 
 jobs:
   release-from-branch:
@@ -106,9 +106,9 @@ jobs:
             VERSION=${{ steps.compute-tag.outputs.tag }}
           tags: ${{ env.LOCAL_CACHE_IMAGE }}
 
-      - name: Configure git bot identity
-        working-directory: ci
-        run: npm run release:configure-git
+      # - name: Configure git bot identity
+      #   working-directory: ci
+      #   run: npm run release:configure-git
 
       - name: Create and push git tag
         working-directory: ci
