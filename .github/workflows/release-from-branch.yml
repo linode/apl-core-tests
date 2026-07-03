@@ -90,6 +90,7 @@ jobs:
         if: ${{ inputs.dry_run == 'false' }}
         run: ci/scripts/prepare_chart_for_release.sh
         env:
+          CHART_PATH: chart/apl-test
           RELEASE_TAG: ${{ steps.compute-tag.outputs.tag }}
 
       - name: Set up Docker Buildx
