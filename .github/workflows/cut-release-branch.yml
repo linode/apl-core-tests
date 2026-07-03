@@ -42,12 +42,12 @@ jobs:
           ref: ${{ inputs.base_branch }}
           fetch-depth: 0
           token: ${{ env.GITHUB_TOKEN }}
-          
+
 
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version-file: .nvmrc
+          node-version-file: ci/.nvmrc
 
       - name: Install CI dependencies
         working-directory: ci
