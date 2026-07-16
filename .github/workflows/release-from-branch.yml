@@ -3,10 +3,6 @@ name: Release from Branch
 on:
   workflow_dispatch:
     inputs:
-      release_branch:
-        description: 'Release cycle branch (e.g. releases/v1.4)'
-        required: true
-        type: string
       is_prerelease:
         description: 'Pre-release — cuts RC tag (false strips RC suffix and cuts stable tag)'
         required: true
@@ -26,7 +22,7 @@ on:
 
 env:
 
-  RELEASE_BRANCH: ${{ inputs.release_branch }}
+  RELEASE_BRANCH: ${{ github.ref_name }}
   REPO: ghcr.io/linode/apl-core-tests
   LOCAL_CACHE_IMAGE: apl-core-tests:ci-build
   BOT_EMAIL: ${{ vars.BOT_EMAIL }}
@@ -45,7 +41,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          ref: ${{ inputs.release_branch }}
+          ref: ${{ env.RELEASE_BRANCH }}
           fetch-depth: 0
           token: ${{secrets.GITHUB_TOKEN}}
 
@@ -60,8 +56,8 @@ jobs:
 
       - name: Validate release branch
         run: |
-          if [[ "${{ inputs.release_branch }}" != releases/* ]]; then
-            echo "::error::release_from_branch may only run on releases/* branches. Got: ${{ inputs.release_branch }}"
+          if [[ "$RELEASE_BRANCH" != releases/* ]]; then
+            echo "::error::release_from_branch may only run on releases/* branches. Got: $RELEASE_BRANCH"
             exit 1
           fi
 
@@ -149,6 +145,6 @@ jobs:
         run: npm run release:create-github-release
         env:
           RELEASE_TAG: ${{ steps.compute-tag.outputs.tag }}
-          IS_PRERELEASE: ${{ steps.compute-tag.outputs.is_prerelease }}
+          IS_PRERELEASE: ${{ inputs.is_prerelease }}
           DRY_RUN: ${{ inputs.dry_run }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
