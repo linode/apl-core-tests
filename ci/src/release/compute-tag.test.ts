@@ -13,6 +13,10 @@ describe('computeTag', () => {
     expect(computeTag(['v6.1.0-rc.3', 'v6.1.0-rc.2'], 'releases/v6.1', true)).toBe('v6.1.0')
   })
 
+  it('starts next patch prerelease after stable promotion', () => {
+    expect(computeTag(['v0.2.0-rc.3', 'v0.2.0'], 'releases/v0.2', false)).toBe('v0.2.1-rc.0')
+  })
+
   it('throws when promoting to stable with no RC tags', () => {
     expect(() => computeTag([], 'releases/v6.1', true)).toThrow()
   })

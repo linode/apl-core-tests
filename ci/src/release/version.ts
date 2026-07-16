@@ -35,7 +35,7 @@ export function promoteToStable(version: string): string {
 
 export function nextPatchRc(version: string): string {
   const [major, minor, patch] = version.split('.').map(Number)
-  return `${major}.${minor}.${patch + 1}-rc.1`
+  return `${major}.${minor}.${patch + 1}-rc.0`
 }
 
 export function nextMainVersion(version: string): string {
@@ -97,7 +97,6 @@ export function computeNextRcTag(branchTags: string[], branchName: string): stri
       return m === major && n === minor
     })
     .sort((a, b) => semver.rcompare(a, b))
-  if (seriesRcs.length > 0) return `v${incrementRc(stripV(seriesRcs[0]))}`
 
   const seriesStables = filterSemver(branchTags)
     .filter((t) => !t.includes('-rc.'))
@@ -106,6 +105,27 @@ export function computeNextRcTag(branchTags: string[], branchName: string): stri
       return m === major && n === minor
     })
     .sort((a, b) => semver.rcompare(a, b))
+
+  if (seriesRcs.length > 0) {
+    if (seriesStables.length === 0) return `v${incrementRc(stripV(seriesRcs[0]))}`
+
+    const rcTop = semver.parse(seriesRcs[0])
+    const stableTop = semver.parse(seriesStables[0])
+
+    // If the top RC is for a patch that is already stable (or older),
+    // begin a new patch prerelease line from the highest stable tag.
+    if (
+      rcTop && stableTop &&
+      (rcTop.major < stableTop.major ||
+       (rcTop.major === stableTop.major && rcTop.minor < stableTop.minor) ||
+       (rcTop.major === stableTop.major && rcTop.minor === stableTop.minor && rcTop.patch <= stableTop.patch))
+    ) {
+      return `v${nextPatchRc(stripV(seriesStables[0]))}`
+    }
+
+    return `v${incrementRc(stripV(seriesRcs[0]))}`
+  }
+
   if (seriesStables.length > 0) return `v${nextPatchRc(stripV(seriesStables[0]))}`
 
   return `v${major}.${minor}.0-rc.1`
