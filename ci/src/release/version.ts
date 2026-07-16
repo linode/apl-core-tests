@@ -11,10 +11,6 @@ export function validateMinorVersion(minorVersion: string): boolean {
   return MINOR_VERSION_RE.test(minorVersion)
 }
 
-export function stripV(minorVersion: string): string {
-  return minorVersion.replace(/^v/, '')
-}
-
 export function cycleStartVersion(minorVersion: string): string {
   return `${minorVersion}.0-rc.1`
 }
@@ -36,12 +32,6 @@ export function promoteToStable(version: string): string {
 export function nextPatchRc(version: string): string {
   const [major, minor, patch] = version.split('.').map(Number)
   return `${major}.${minor}.${patch + 1}-rc.1`
-}
-
-export function nextMainVersion(version: string): string {
-  const base = promoteToStable(version)
-  const [major, minor] = base.split('.').map(Number)
-  return `${major}.${minor + 1}.0-rc.0`
 }
 
 export function versionMatchesBranch(version: string, branch: string): boolean {
@@ -68,15 +58,15 @@ export function previousStableTagBefore(newTag: string, tags: string[]): string 
 }
 
 export function previousRcTag(currentTag: string, tags: string[]): string | null {
-  const [majorMinorPatch] = currentTag.replace('v', '').split('-rc.')
-  const [major, minor] = majorMinorPatch.split('.')
+  const currentVersion = semver.parse(currentTag)
+  if (!currentVersion) return null
+
   const sameSeries = filterSemver(tags)
     .filter((t) => t !== currentTag)
     .filter((t) => t.includes('-rc.'))
     .filter((t) => {
-      const bare = t.replace('v', '').split('-rc.')[0]
-      const [m, n] = bare.split('.')
-      return m === major && n === minor
+      const parsed = semver.parse(t)
+      return parsed?.major === currentVersion.major && parsed?.minor === currentVersion.minor
     })
     .sort((a, b) => semver.rcompare(a, b))
   return sameSeries.length > 0 ? sameSeries[0] : null
@@ -85,25 +75,34 @@ export function previousRcTag(currentTag: string, tags: string[]): string | null
 export function computeStableTag(branchTags: string[]): string {
   const rcs = filterSemver(branchTags).filter((t) => t.includes('-rc.')).sort((a, b) => semver.rcompare(a, b))
   if (rcs.length === 0) throw new Error('No RC tags on branch — cannot promote to stable without a prior RC')
-  return `v${promoteToStable(stripV(rcs[0]))}`
+  const version = semver.coerce(rcs[0])?.toString() // ensure the tag is a valid semver version
+  return `v${version}`
 }
 
 export function computeNextRcTag(branchTags: string[], branchName: string): string {
-  const [major, minor] = stripV(branchName.replace('releases/', '')).split('.')
+  const branchVersion = semver.coerce(branchName.replace('releases/', ''))
+  if (!branchVersion) throw new Error(`Invalid release branch name: ${branchName}`)
+
+  const major = branchVersion.major
+  const minor = branchVersion.minor
   const seriesRcs = filterSemver(branchTags)
     .filter((t) => t.includes('-rc.'))
     .filter((t) => {
-      const [m, n] = stripV(t).split('-rc.')[0].split('.')
-      return m === major && n === minor
+      const parsed = semver.parse(t)
+      return parsed?.major === major && parsed?.minor === minor
     })
     .sort((a, b) => semver.rcompare(a, b))
   if (seriesRcs.length === 0) return `v${major}.${minor}.0-rc.1`
-  return `v${incrementRc(stripV(seriesRcs[0]))}`
+
+  const next = semver.inc(seriesRcs[0], 'prerelease', 'rc')
+  if (!next) throw new Error(`Could not increment RC tag: ${seriesRcs[0]}`)
+  return `v${next}`
 }
 
 export function computeDevVersion(highestTag: string, shortSha: string): string {
-  const [major, minor, patch] = promoteToStable(stripV(highestTag)).split('.').map(Number)
-  return `${major}.${minor}.${patch + 1}-dev.${shortSha}`
+  const version = semver.coerce(highestTag)
+  if (!version) throw new Error(`Invalid highest tag: ${highestTag}`)
+  return `${version.major}.${version.minor}.${version.patch + 1}-dev.${shortSha}`
 }
 
 export function highestTag(tags: string[]): string | null {
@@ -122,7 +121,11 @@ export function isHighestStableTag(newTag: string, existingTags: string[]): bool
 }
 
 export function computeReleaseBranchName(tag: string, bumpType: 'minor' | 'major'): string {
-  const [major, minor] = stripV(tag).split('.').map(Number)
-  const [newMajor, newMinor] = bumpType === 'major' ? [major + 1, 0] : [major, minor + 1]
+  const version = semver.parse(tag)
+  if (!version) throw new Error(`Invalid tag: ${tag}`)
+
+  const [newMajor, newMinor] = bumpType === 'major'
+    ? [version.major + 1, 0]
+    : [version.major, version.minor + 1]
   return `releases/v${newMajor}.${newMinor}`
 }

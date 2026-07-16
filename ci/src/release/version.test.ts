@@ -8,14 +8,12 @@ import {
     cycleStartVersion,
     incrementRc,
     isHighestStableTag,
-    nextMainVersion,
     nextPatchRc,
     previousRcTag,
     previousStableTag,
     previousStableTagBefore,
     promoteToStable,
     releaseBranchName,
-    stripV,
     validateMinorVersion,
     validateVersion,
     versionMatchesBranch,
@@ -53,16 +51,6 @@ describe('validateMinorVersion', () => {
     ['', false],
   ])('validateMinorVersion(%s) → %s', (v, expected) => {
     expect(validateMinorVersion(v)).toBe(expected)
-  })
-})
-
-describe('stripV', () => {
-  it.each([
-    ['v1.4', '1.4'],
-    ['v10.12', '10.12'],
-    ['1.4', '1.4'],
-  ])('stripV(%s) → %s', (input, expected) => {
-    expect(stripV(input)).toBe(expected)
   })
 })
 
@@ -114,16 +102,6 @@ describe('nextPatchRc', () => {
     ['6.0.0', '6.0.1-rc.1'],
   ])('nextPatchRc(%s) → %s', (version, expected) => {
     expect(nextPatchRc(version)).toBe(expected)
-  })
-})
-
-describe('nextMainVersion', () => {
-  it.each([
-    ['1.4.0-rc.1', '1.5.0-rc.0'],
-    ['1.4.0', '1.5.0-rc.0'],
-    ['6.0.0-rc.0', '6.1.0-rc.0'],
-  ])('nextMainVersion(%s) → %s', (version, expected) => {
-    expect(nextMainVersion(version)).toBe(expected)
   })
 })
 
