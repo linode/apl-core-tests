@@ -235,6 +235,16 @@ describe('computeNextRcTag', () => {
     expect(computeNextRcTag(tags, 'releases/v6.1')).toBe('v6.1.1-rc.2')
   })
 
+  it('starts next RC at the next patch after stable when only old patch RCs exist', () => {
+    const tags = ['v6.1.0', 'v6.1.0-rc.3', 'v6.1.0-rc.2']
+    expect(computeNextRcTag(tags, 'releases/v6.1')).toBe('v6.1.1-rc.1')
+  })
+
+  it('uses highest stable patch to select the RC patch series', () => {
+    const tags = ['v6.1.2', 'v6.1.3-rc.2', 'v6.1.1-rc.9']
+    expect(computeNextRcTag(tags, 'releases/v6.1')).toBe('v6.1.3-rc.3')
+  })
+
   it('ignores RC tags from other series on the same branch', () => {
     const tags = ['v6.1.0-rc.3', 'v6.0.0-rc.8']
     expect(computeNextRcTag(tags, 'releases/v6.1')).toBe('v6.1.0-rc.4')

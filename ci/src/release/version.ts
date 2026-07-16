@@ -85,17 +85,30 @@ export function computeNextRcTag(branchTags: string[], branchName: string): stri
 
   const major = branchVersion.major
   const minor = branchVersion.minor
-  const seriesRcs = filterSemver(branchTags)
+  const seriesTags = filterSemver(branchTags).filter((t) => {
+    const parsed = semver.parse(t)
+    return parsed?.major === major && parsed?.minor === minor
+  })
+
+  const highestStable = seriesTags
+    .filter((t) => !t.includes('-rc.'))
+    .sort((a, b) => semver.rcompare(a, b))[0]
+
+  const targetPatch = highestStable
+    ? (semver.parse(highestStable)?.patch ?? 0) + 1
+    : 0
+
+  const targetSeriesRcs = seriesTags
     .filter((t) => t.includes('-rc.'))
     .filter((t) => {
       const parsed = semver.parse(t)
-      return parsed?.major === major && parsed?.minor === minor
+      return parsed?.patch === targetPatch
     })
     .sort((a, b) => semver.rcompare(a, b))
-  if (seriesRcs.length === 0) return `v${major}.${minor}.0-rc.1`
+  if (targetSeriesRcs.length === 0) return `v${major}.${minor}.${targetPatch}-rc.1`
 
-  const next = semver.inc(seriesRcs[0], 'prerelease', 'rc')
-  if (!next) throw new Error(`Could not increment RC tag: ${seriesRcs[0]}`)
+  const next = semver.inc(targetSeriesRcs[0], 'prerelease', 'rc')
+  if (!next) throw new Error(`Could not increment RC tag: ${targetSeriesRcs[0]}`)
   return `v${next}`
 }
 
