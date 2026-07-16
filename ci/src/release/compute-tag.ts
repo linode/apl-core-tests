@@ -19,7 +19,6 @@ function main() {
 
   if (process.env.GITHUB_OUTPUT) {
     appendFileSync(process.env.GITHUB_OUTPUT, `tag=${tag}\n`)
-    appendFileSync(process.env.GITHUB_OUTPUT, `is_prerelease=${tag.includes('-rc.')}\n`)
   }
 }
 

@@ -21,7 +21,6 @@ on:
           - 'false'
 
 env:
-
   RELEASE_BRANCH: ${{ github.ref_name }}
   REPO: ghcr.io/linode/apl-core-tests
   LOCAL_CACHE_IMAGE: apl-core-tests:ci-build
