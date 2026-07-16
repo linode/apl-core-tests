@@ -18,10 +18,6 @@ async function main() {
 
   const prereleaseFlag = isPrerelease ? '--prerelease' : ''
   const notesStartFlag = previousTag ? `--notes-start-tag "${previousTag}"` : ''
-  const rcBanner = isPrerelease
-    ? `> ⚠️ This is a release candidate. Do not use in production without testing.\n\n`
-    : ''
-
   console.log(`Creating GitHub release for ${tag}`)
   console.log(`  prerelease: ${isPrerelease}`)
   console.log(`  previous tag: ${previousTag ?? '(none)'}`)
