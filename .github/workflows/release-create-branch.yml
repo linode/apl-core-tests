@@ -34,7 +34,7 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  cut-release-branch:
+  release-create-branch:
     runs-on: ubuntu-22.04
     permissions:
       contents: write

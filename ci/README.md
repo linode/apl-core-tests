@@ -191,19 +191,19 @@ Creates a new `releases/vMAJOR.MINOR` branch from the specified base and pushes 
 
 ```sh
 # Dry run — derives and validates the branch name without pushing
-gh workflow run cut-release-branch.yml \
+gh workflow run release-create-branch.yml \
   -f bump_type=minor \
   -f base_branch=main \
   -f dry_run=true
 
 # Cut a minor release branch for real
-gh workflow run cut-release-branch.yml \
+gh workflow run release-create-branch.yml \
   -f bump_type=minor \
   -f base_branch=main \
   -f dry_run=false
 
 # Cut a major release branch for real
-gh workflow run cut-release-branch.yml \
+gh workflow run release-create-branch.yml \
   -f bump_type=major \
   -f base_branch=main \
   -f dry_run=false
