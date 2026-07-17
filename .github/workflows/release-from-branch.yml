@@ -60,14 +60,6 @@ jobs:
             exit 1
           fi
 
-      - name: Check versions.yaml entries are semver-compatible
-        working-directory: ci
-        run: npm run release:check-versions-yaml
-        env:
-          REPO_ROOT: ${{ github.workspace }}
-          IS_PRERELEASE: ${{ inputs.is_prerelease }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Compute release tag
         id: compute-tag
         working-directory: ci
@@ -81,6 +73,13 @@ jobs:
         env:
           RELEASE_TAG: ${{ steps.compute-tag.outputs.tag }}
 
+      - name: Check versions.yaml entries are semver-compatible
+        working-directory: ci
+        run: npm run release:check-versions-yaml
+        env:
+          REPO_ROOT: ${{ github.workspace }}
+          IS_PRERELEASE: ${{ inputs.is_prerelease }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Prepare Helm chart
         if: ${{ inputs.dry_run == 'false' }}
         run: ci/scripts/prepare_chart_for_release.sh
@@ -102,9 +101,9 @@ jobs:
             VERSION=${{ steps.compute-tag.outputs.tag }}
           tags: ${{ env.LOCAL_CACHE_IMAGE }}
 
-      - name: Configure git bot identity
-        working-directory: ci
-        run: npm run release:configure-git
+      # - name: Configure git bot identity
+      #   working-directory: ci
+      #   run: npm run release:configure-git
 
       - name: Create and push git tag
         working-directory: ci
