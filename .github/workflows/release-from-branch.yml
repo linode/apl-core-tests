@@ -29,8 +29,19 @@ jobs:
       release_branch: ${{ github.ref_name }}
       is_prerelease: ${{ inputs.is_prerelease == 'true' }}
 
-  release-from-branch:
+  validate-deps:
     needs: release-get-tag
+    permissions:
+      contents: read
+    uses: ./.github/workflows/validate-deps.yml
+    with:
+      release_branch: ${{ github.ref_name }}
+      is_prerelease: ${{ inputs.is_prerelease == 'true' }}
+
+  release-from-branch:
+    needs:
+      - release-get-tag
+      - validate-deps
     permissions:
       contents: write
     uses: ./.github/workflows/release-software.yml
