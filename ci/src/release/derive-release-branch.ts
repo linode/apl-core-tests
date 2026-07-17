@@ -5,6 +5,7 @@ import { computeReleaseBranchName, highestStableTag } from './version'
 
 function main() {
   const bumpType = process.env.BUMP_TYPE as 'minor' | 'major'
+  const branchPrefix = process.env.RELEASE_BRANCH_PREFIX!
 
   if (bumpType !== 'minor' && bumpType !== 'major') {
     console.error(`Invalid BUMP_TYPE: "${bumpType}". Must be "minor" or "major".`)
@@ -20,7 +21,7 @@ function main() {
     process.exit(1)
   }
 
-  const branch = computeReleaseBranchName(highest, bumpType)
+  const branch = computeReleaseBranchName(highest, bumpType, branchPrefix)
   console.log(`Highest stable tag: ${highest}`)
   console.log(`Derived release branch: ${branch}`)
 

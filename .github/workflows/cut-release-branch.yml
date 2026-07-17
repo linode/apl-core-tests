@@ -25,6 +25,7 @@ on:
           - 'false'
 
 env:
+  RELEASE_BRANCH_PREFIX: 'releases/'
   BOT_EMAIL: ${{ vars.BOT_EMAIL }}
   BOT_USERNAME: ${{ vars.BOT_USERNAME }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

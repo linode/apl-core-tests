@@ -3,6 +3,22 @@ import semver from 'semver'
 const VERSION_RE = /^\d+\.\d+\.\d+(-rc\.\d+)?$/
 const MINOR_VERSION_RE = /^v\d+\.\d+$/
 
+export interface ReleaseSeries {
+  major: number
+  minor: number
+}
+
+export function releaseSeriesFromBranch(branchName: string, branchPrefix: string): ReleaseSeries {
+  if (!branchName.startsWith(branchPrefix)) {
+    throw new Error(`Invalid release branch name: ${branchName}`)
+  }
+
+  const match = /^v(\d+)\.(\d+)$/.exec(branchName.slice(branchPrefix.length))
+  if (!match) throw new Error(`Invalid release branch name: ${branchName}`)
+
+  return { major: Number(match[1]), minor: Number(match[2]) }
+}
+
 export function validateVersion(version: string): boolean {
   return VERSION_RE.test(version)
 }
@@ -72,44 +88,46 @@ export function previousRcTag(currentTag: string, tags: string[]): string | null
   return sameSeries.length > 0 ? sameSeries[0] : null
 }
 
-export function computeStableTag(branchTags: string[]): string {
-  const rcs = filterSemver(branchTags).filter((t) => t.includes('-rc.')).sort((a, b) => semver.rcompare(a, b))
+function tagsForReleaseSeries(tags: string[], releaseSeries: ReleaseSeries): string[] {
+  return filterSemver(tags).filter((tag) => {
+    const parsed = semver.parse(tag)
+    return parsed?.major === releaseSeries.major && parsed?.minor === releaseSeries.minor
+  })
+}
+
+export function computeStableTag(branchTags: string[], releaseSeries: ReleaseSeries): string {
+  const rcs = tagsForReleaseSeries(branchTags, releaseSeries)
+    .filter((t) => t.includes('-rc.'))
+    .sort((a, b) => semver.rcompare(a, b))
   if (rcs.length === 0) throw new Error('No RC tags on branch — cannot promote to stable without a prior RC')
   const version = semver.coerce(rcs[0])?.toString() // ensure the tag is a valid semver version
   return `v${version}`
 }
 
-export function computeNextRcTag(branchTags: string[], branchName: string): string {
-  const branchVersion = semver.coerce(branchName.replace('releases/', ''))
-  if (!branchVersion) throw new Error(`Invalid release branch name: ${branchName}`)
+export function computeNextRcTag(branchTags: string[], releaseSeries: ReleaseSeries): string {
+  const { major, minor } = releaseSeries
+  const versions = tagsForReleaseSeries(branchTags, releaseSeries)
+    .map((tag) => semver.parse(tag))
+    .filter((version): version is semver.SemVer => version !== null)
 
-  const major = branchVersion.major
-  const minor = branchVersion.minor
-  const seriesTags = filterSemver(branchTags).filter((t) => {
-    const parsed = semver.parse(t)
-    return parsed?.major === major && parsed?.minor === minor
-  })
+  const highestStablePatch = versions
+    .filter((version) => version.prerelease.length === 0)
+    .reduce((highest, version) => Math.max(highest, version.patch), -1)
 
-  const highestStable = seriesTags
-    .filter((t) => !t.includes('-rc.'))
-    .sort((a, b) => semver.rcompare(a, b))[0]
+    // If there are no stable tags, we start at patch 0. If there are stable tags, we increment the highest patch by 1 for the next RC.
+  const targetPatch = highestStablePatch + 1
 
-  const targetPatch = highestStable
-    ? (semver.parse(highestStable)?.patch ?? 0) + 1
-    : 0
-
-  const targetSeriesRcs = seriesTags
-    .filter((t) => t.includes('-rc.'))
-    .filter((t) => {
-      const parsed = semver.parse(t)
-      return parsed?.patch === targetPatch
-    })
-    .sort((a, b) => semver.rcompare(a, b))
-  if (targetSeriesRcs.length === 0) return `v${major}.${minor}.${targetPatch}-rc.1`
-
-  const next = semver.inc(targetSeriesRcs[0], 'prerelease', 'rc')
-  if (!next) throw new Error(`Could not increment RC tag: ${targetSeriesRcs[0]}`)
-  return `v${next}`
+  const highestRc = versions
+    .filter((version) =>
+      version.patch === targetPatch &&
+      version.prerelease[0] === 'rc' &&
+      typeof version.prerelease[1] === 'number'
+    )
+    .reduce((highest, version) => Math.max(highest, version.prerelease[1] as number), 0)
+  // If there are no RC tags for the target patch, we start at rc.1. 
+  // If there are existing RC tags, we increment the highest RC number by 1 for the next RC.
+  const targetRcNumber = highestRc + 1
+  return `v${major}.${minor}.${targetPatch}-rc.${targetRcNumber}`
 }
 
 export function computeDevVersion(highestTag: string, shortSha: string): string {
@@ -133,12 +151,12 @@ export function isHighestStableTag(newTag: string, existingTags: string[]): bool
   return stableTags.every((t) => semver.gt(newTag, t))
 }
 
-export function computeReleaseBranchName(tag: string, bumpType: 'minor' | 'major'): string {
+export function computeReleaseBranchName(tag: string, bumpType: 'minor' | 'major', branchPrefix = 'releases/'): string {
   const version = semver.parse(tag)
   if (!version) throw new Error(`Invalid tag: ${tag}`)
 
   const [newMajor, newMinor] = bumpType === 'major'
     ? [version.major + 1, 0]
     : [version.major, version.minor + 1]
-  return `releases/v${newMajor}.${newMinor}`
+  return `${branchPrefix}v${newMajor}.${newMinor}`
 }
