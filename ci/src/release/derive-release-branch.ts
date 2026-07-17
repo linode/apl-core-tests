@@ -1,7 +1,7 @@
 import { appendFileSync } from 'fs'
 import { execSync } from 'child_process'
 import { config } from 'dotenv'
-import { computeReleaseBranchName, highestStableTag } from './version'
+import { computeReleaseBranchName, highestStableTag, highestTag } from './version'
 
 function main() {
   const bumpType = process.env.BUMP_TYPE as 'minor' | 'major'
@@ -14,7 +14,7 @@ function main() {
 
   const tagsRaw = execSync('git tag', { encoding: 'utf8' })
   const tags = tagsRaw.trim().split('\n').filter(Boolean)
-  const highest = highestStableTag(tags)
+  const highest = highestTag(tags)
 
   if (!highest) {
     console.error('No stable tags found in repository — cannot derive release branch name.')

@@ -14,10 +14,32 @@ import {
     previousStableTagBefore,
     promoteToStable,
     releaseBranchName,
+    releaseSeriesFromBranch,
     validateMinorVersion,
     validateVersion,
     versionMatchesBranch,
 } from './version'
+
+describe('releaseSeriesFromBranch', () => {
+  it.each([
+    ['releases/v6.1', 'releases/', { major: 6, minor: 1 }],
+    ['release/v10.12', 'release/', { major: 10, minor: 12 }],
+  ])('parses %s with prefix %s', (branchName, branchPrefix, expected) => {
+    expect(releaseSeriesFromBranch(branchName, branchPrefix)).toEqual(expected)
+  })
+
+  it.each([
+    ['releases/v6.1', 'release/'],
+    ['releases/6.1', 'releases/'],
+    ['releases/v6', 'releases/'],
+    ['releases/v6.1.0', 'releases/'],
+    ['releases/v6.1-extra', 'releases/'],
+  ])('rejects invalid branch %s with prefix %s', (branchName, branchPrefix) => {
+    expect(() => releaseSeriesFromBranch(branchName, branchPrefix)).toThrow(
+      `Invalid release branch name: ${branchName}`
+    )
+  })
+})
 
 describe('validateVersion', () => {
   it.each([
@@ -226,6 +248,16 @@ describe('computeNextRcTag', () => {
 
   it('increments the RC counter when RC tags exist on the branch', () => {
     const tags = ['v6.1.0-rc.1', 'v6.1.0-rc.2', 'v5.1.0']
+    expect(computeNextRcTag(tags, releaseSeries)).toBe('v6.1.0-rc.3')
+  })
+
+  it('uses the highest RC regardless of tag order', () => {
+    const tags = ['v6.1.0-rc.3', 'v6.1.0-rc.1', 'v6.1.0-rc.2']
+    expect(computeNextRcTag(tags, releaseSeries)).toBe('v6.1.0-rc.4')
+  })
+
+  it('ignores non-RC prereleases', () => {
+    const tags = ['v6.1.0-beta.9', 'v6.1.0-rc.2']
     expect(computeNextRcTag(tags, releaseSeries)).toBe('v6.1.0-rc.3')
   })
 
