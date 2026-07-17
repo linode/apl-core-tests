@@ -220,74 +220,76 @@ describe('isHighestStableTag', () => {
 
 describe('computeStableTag', () => {
   const releaseSeries = { major: 6, minor: 1 }
+  const tagPrefix = 'v'
 
   it('promotes the highest RC tag to stable', () => {
-    expect(computeStableTag(['v6.1.0-rc.3', 'v6.1.0-rc.2', 'v6.1.0-rc.1'], releaseSeries)).toBe('v6.1.0')
+    expect(computeStableTag(['v6.1.0-rc.3', 'v6.1.0-rc.2', 'v6.1.0-rc.1'], releaseSeries, tagPrefix)).toBe('v6.1.0')
   })
 
   it('handles a single RC tag', () => {
-    expect(computeStableTag(['v6.1.1-rc.1'], releaseSeries)).toBe('v6.1.1')
+    expect(computeStableTag(['v6.1.1-rc.1'], releaseSeries, tagPrefix)).toBe('v6.1.1')
   })
 
   it('ignores stable tags when finding the RC to promote', () => {
-    expect(computeStableTag(['v6.1.0', 'v6.1.1-rc.1'], releaseSeries)).toBe('v6.1.1')
+    expect(computeStableTag(['v6.1.0', 'v6.1.1-rc.1'], releaseSeries, tagPrefix)).toBe('v6.1.1')
   })
 
   it('ignores RC tags from other release series', () => {
-    expect(computeStableTag(['v7.0.0-rc.1', 'v6.1.0-rc.3'], releaseSeries)).toBe('v6.1.0')
+    expect(computeStableTag(['v7.0.0-rc.1', 'v6.1.0-rc.3'], releaseSeries, tagPrefix)).toBe('v6.1.0')
   })
 
   it('throws when no RC tags exist', () => {
-    expect(() => computeStableTag([], releaseSeries)).toThrow()
-    expect(() => computeStableTag(['v6.1.0'], releaseSeries)).toThrow()
+    expect(() => computeStableTag([], releaseSeries, tagPrefix)).toThrow()
+    expect(() => computeStableTag(['v6.1.0'], releaseSeries, tagPrefix)).toThrow()
   })
 })
 
 describe('computeNextRcTag', () => {
   const releaseSeries = { major: 6, minor: 1 }
+  const tagPrefix = 'v'
 
   it('increments the RC counter when RC tags exist on the branch', () => {
     const tags = ['v6.1.0-rc.1', 'v6.1.0-rc.2', 'v5.1.0']
-    expect(computeNextRcTag(tags, releaseSeries)).toBe('v6.1.0-rc.3')
+    expect(computeNextRcTag(tags, releaseSeries, tagPrefix)).toBe('v6.1.0-rc.3')
   })
 
   it('uses the highest RC regardless of tag order', () => {
     const tags = ['v6.1.0-rc.3', 'v6.1.0-rc.1', 'v6.1.0-rc.2']
-    expect(computeNextRcTag(tags, releaseSeries)).toBe('v6.1.0-rc.4')
+    expect(computeNextRcTag(tags, releaseSeries, tagPrefix)).toBe('v6.1.0-rc.4')
   })
 
   it('ignores non-RC prereleases', () => {
     const tags = ['v6.1.0-beta.9', 'v6.1.0-rc.2']
-    expect(computeNextRcTag(tags, releaseSeries)).toBe('v6.1.0-rc.3')
+    expect(computeNextRcTag(tags, releaseSeries, tagPrefix)).toBe('v6.1.0-rc.3')
   })
 
   it('starts at rc.1 when no tags exist at all', () => {
-    expect(computeNextRcTag([], releaseSeries)).toBe('v6.1.0-rc.1')
+    expect(computeNextRcTag([], releaseSeries, tagPrefix)).toBe('v6.1.0-rc.1')
   })
 
   it('starts at rc.1 when branch has no tags in its own series', () => {
     const tags = ['v5.1.0', 'v6.0.0-rc.8']
-    expect(computeNextRcTag(tags, releaseSeries)).toBe('v6.1.0-rc.1')
+    expect(computeNextRcTag(tags, releaseSeries, tagPrefix)).toBe('v6.1.0-rc.1')
   })
 
   it('handles patch-level RC after a stable has been cut', () => {
     const tags = ['v6.1.0', 'v6.1.1-rc.1']
-    expect(computeNextRcTag(tags, releaseSeries)).toBe('v6.1.1-rc.2')
+    expect(computeNextRcTag(tags, releaseSeries, tagPrefix)).toBe('v6.1.1-rc.2')
   })
 
   it('starts next RC at the next patch after stable when only old patch RCs exist', () => {
     const tags = ['v6.1.0', 'v6.1.0-rc.3', 'v6.1.0-rc.2']
-    expect(computeNextRcTag(tags, releaseSeries)).toBe('v6.1.1-rc.1')
+    expect(computeNextRcTag(tags, releaseSeries, tagPrefix)).toBe('v6.1.1-rc.1')
   })
 
   it('uses highest stable patch to select the RC patch series', () => {
     const tags = ['v6.1.2', 'v6.1.3-rc.2', 'v6.1.1-rc.9']
-    expect(computeNextRcTag(tags, releaseSeries)).toBe('v6.1.3-rc.3')
+    expect(computeNextRcTag(tags, releaseSeries, tagPrefix)).toBe('v6.1.3-rc.3')
   })
 
   it('ignores RC tags from other series on the same branch', () => {
     const tags = ['v6.1.0-rc.3', 'v6.0.0-rc.8']
-    expect(computeNextRcTag(tags, releaseSeries)).toBe('v6.1.0-rc.4')
+    expect(computeNextRcTag(tags, releaseSeries, tagPrefix)).toBe('v6.1.0-rc.4')
   })
 })
 

@@ -23,6 +23,7 @@ on:
 env:
   RELEASE_BRANCH: ${{ github.ref_name }}
   RELEASE_BRANCH_PREFIX: 'releases/'
+  RELEASE_TAG_PREFIX: 'v'
   REPO: ghcr.io/linode/apl-core-tests
   LOCAL_CACHE_IMAGE: apl-core-tests:ci-build
   DOCKER_USERNAME: linode
