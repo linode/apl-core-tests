@@ -43,7 +43,6 @@
     "release:create-release-branch": "tsx src/release/create-release-branch.ts",
     "release:check-versions-yaml": "tsx src/release/check-versions-yaml.ts",
     "release:compute-tag": "tsx src/release/compute-tag.ts",
-    "release:compute-dev-version": "tsx src/release/compute-dev-version.ts",
     "release:check-tag-not-exists": "tsx src/release/check-tag-not-exists.ts",
     "release:tag-release": "tsx src/release/tag-release.ts",
     "release:create-github-release": "tsx src/release/create-github-release.ts",

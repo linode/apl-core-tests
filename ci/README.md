@@ -135,14 +135,6 @@ Writes `tag` and `is_prerelease` to `GITHUB_OUTPUT`.
 
 ---
 
-### `release:compute-dev-version`
-
-Computes a dev build version string of the form `X.Y.(Z+1)-dev.<sha>` from the highest tag in the repository. Writes `version` to `GITHUB_OUTPUT`.
-
-No required environment variables.
-
----
-
 ### `release:check-tag-not-exists`
 
 Exits non-zero if `RELEASE_TAG` already exists. Prevents duplicate releases.
