@@ -24,7 +24,7 @@ jobs:
   release-get-tag:
     permissions:
       contents: read
-    uses: ./.github/workflows/release-get-tag.yml
+    uses: linode/apl-gh-actions/.github/workflows/release-get-tag.yml@main
     with:
       release_branch: ${{ github.ref_name }}
       is_prerelease: ${{ inputs.is_prerelease == 'true' }}
@@ -33,7 +33,7 @@ jobs:
     needs: release-get-tag
     permissions:
       contents: read
-    uses: ./.github/workflows/validate-deps.yml
+    uses: linode/apl-gh-actions/.github/workflows/validate-deps.yml@main
     with:
       release_branch: ${{ github.ref_name }}
       is_prerelease: ${{ inputs.is_prerelease == 'true' }}
@@ -44,7 +44,7 @@ jobs:
       - validate-deps
     permissions:
       contents: write
-    uses: ./.github/workflows/release-software.yml
+    uses: linode/apl-gh-actions/.github/workflows/release-software.yml@main
     with:
       release_branch: ${{ github.ref_name }}
       release_tag: ${{ needs.release-get-tag.outputs.release_tag }}
@@ -60,7 +60,7 @@ jobs:
       - release-from-branch
     permissions:
       contents: write
-    uses: ./.github/workflows/release-helm-chart.yml
+    uses: linode/apl-gh-actions/.github/workflows/release-helm-chart.yml@main
     with:
       release_tag: ${{ needs.release-get-tag.outputs.release_tag }}
       dry_run: ${{ inputs.dry_run == 'true' }}
