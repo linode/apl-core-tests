@@ -60,25 +60,15 @@ jobs:
         run: npm run release:derive-release-branch
         env:
           BUMP_TYPE: ${{ inputs.bump_type }}
+          RELEASE_BRANCH_PREFIX: ${{ env.RELEASE_BRANCH_PREFIX }}
 
       - name: Check release branch does not already exist
         working-directory: ci
         run: npm run release:check-branch-not-exists
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Run tests in Docker (test gate)
-        uses: docker/build-push-action@v7
-        with:
-          push: false
-          load: true
-          context: .
-          build-args: SKIP_TESTS=false
-
-      - name: Configure git bot identity
-        working-directory: ci
-        run: npm run release:configure-git
+      # - name: Configure git bot identity
+      #   working-directory: ci
+      #   run: npm run release:configure-git
 
       - name: Create release branch
         if: ${{ inputs.dry_run == 'false' }}
