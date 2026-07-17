@@ -35,52 +35,11 @@ env:
 
 jobs:
   release-create-branch:
-    runs-on: ubuntu-22.04
     permissions:
       contents: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ inputs.base_branch }}
-          fetch-depth: 0
-          token: ${{ env.GITHUB_TOKEN }}
-
-
-      - name: Setup Node
-        uses: actions/setup-node@v6
-        with:
-          node-version-file: ci/.nvmrc
-
-      - name: Install CI dependencies
-        working-directory: ci
-        run: npm ci
-
-      - name: Derive release branch from highest stable tag
-        id: derive-branch
-        working-directory: ci
-        run: npm run release:derive-release-branch
-        env:
-          BUMP_TYPE: ${{ inputs.bump_type }}
-          RELEASE_BRANCH_PREFIX: ${{ env.RELEASE_BRANCH_PREFIX }}
-
-      - name: Check release branch does not already exist
-        working-directory: ci
-        run: npm run release:check-branch-not-exists
-
-      - name: Configure git identity
-        env:
-          ACTOR_ID: ${{ github.actor_id }}
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "${ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
-
-      - name: Create release branch
-        if: ${{ inputs.dry_run == 'false' }}
-        working-directory: ci
-        run: npm run release:create-release-branch
-
-      - name: Push release branch
-        if: ${{ inputs.dry_run == 'false' }}
-        run: git push origin "$RELEASE_BRANCH"
+    uses: linode/apl-gh-actions/.github/workflows/release-create-branch.yml@main
+    with:
+      bump_type: ${{ inputs.bump_type }}
+      base_branch: ${{ inputs.base_branch }}
+      release_branch_prefix: ${{ inputs.release_branch_prefix }}
+      dry_run: ${{ inputs.dry_run }}
