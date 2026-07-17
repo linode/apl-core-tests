@@ -15,6 +15,11 @@ on:
         required: true
         default: 'main'
         type: string
+      release_branch_prefix:
+        description: 'Prefix for release branches'
+        required: true
+        default: 'releases/'
+        type: string
       dry_run:
         description: 'Dry run — skip all writes (git push)'
         required: true
@@ -25,7 +30,7 @@ on:
           - 'false'
 
 env:
-  RELEASE_BRANCH_PREFIX: 'releases/'
+  RELEASE_BRANCH_PREFIX: ${{ inputs.release_branch_prefix }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:

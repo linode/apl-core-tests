@@ -21,23 +21,35 @@ on:
           - 'false'
 
 jobs:
+  release-get-tag:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/release-get-tag.yml
+    with:
+      release_branch: ${{ github.ref_name }}
+      is_prerelease: ${{ inputs.is_prerelease == 'true' }}
+
   release-from-branch:
+    needs: release-get-tag
     permissions:
       contents: write
     uses: ./.github/workflows/release-software.yml
     with:
       release_branch: ${{ github.ref_name }}
+      release_tag: ${{ needs.release-get-tag.outputs.release_tag }}
       is_prerelease: ${{ inputs.is_prerelease == 'true' }}
       dry_run: ${{ inputs.dry_run == 'true' }}
       container_registry: 'ghcr.io/linode/apl-core-tests'
       oci_username: 'linode'
     secrets:
       oci_password: ${{ secrets.DOCKER_PASSWORD }}
-  release-chart:
-    needs: release-from-branch
+  release-helm-chart:
+    needs:
+      - release-get-tag
+      - release-from-branch
     permissions:
       contents: write
-    uses: ./.github/workflows/release-chart-from-tag.yml
+    uses: ./.github/workflows/release-helm-chart.yml
     with:
-      release_tag: ${{ needs.release-from-branch.outputs.release_tag }}
+      release_tag: ${{ needs.release-get-tag.outputs.release_tag }}
       dry_run: ${{ inputs.dry_run == 'true' }}
