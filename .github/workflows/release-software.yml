@@ -3,10 +3,6 @@ name: Release Tag from Branch
 on:
   workflow_call:
     inputs:
-      release_branch:
-        description: 'Release branch to tag'
-        required: true
-        type: string
       is_prerelease:
         description: 'Cut an RC tag instead of a stable tag'
         required: true
@@ -15,6 +11,10 @@ on:
         description: 'Skip all writes (tag, release, and Docker push)'
         required: true
         type: boolean
+      release_branch:
+        description: 'Release branch to tag'
+        required: true
+        type: string
       release_branch_prefix:
         description: 'Prefix required for release branches'
         required: false
