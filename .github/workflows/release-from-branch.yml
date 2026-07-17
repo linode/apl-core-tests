@@ -25,8 +25,6 @@ env:
   RELEASE_BRANCH_PREFIX: 'releases/'
   REPO: ghcr.io/linode/apl-core-tests
   LOCAL_CACHE_IMAGE: apl-core-tests:ci-build
-  BOT_EMAIL: ${{ vars.BOT_EMAIL }}
-  BOT_USERNAME: ${{ vars.BOT_USERNAME }}
   DOCKER_USERNAME: linode
   DOCKER_PASSWORD: ${{secrets.GITHUB_TOKEN}}
 
@@ -101,6 +99,13 @@ jobs:
             SKIP_TESTS=false
             VERSION=${{ steps.compute-tag.outputs.tag }}
           tags: ${{ env.LOCAL_CACHE_IMAGE }}
+
+      - name: Configure git identity
+        env:
+          ACTOR_ID: ${{ github.actor_id }}
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "${ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
 
       - name: Create and push git tag
         working-directory: ci

@@ -26,8 +26,6 @@ on:
 
 env:
   RELEASE_BRANCH_PREFIX: 'releases/'
-  BOT_EMAIL: ${{ vars.BOT_EMAIL }}
-  BOT_USERNAME: ${{ vars.BOT_USERNAME }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
@@ -66,9 +64,12 @@ jobs:
         working-directory: ci
         run: npm run release:check-branch-not-exists
 
-      # - name: Configure git bot identity
-      #   working-directory: ci
-      #   run: npm run release:configure-git
+      - name: Configure git identity
+        env:
+          ACTOR_ID: ${{ github.actor_id }}
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "${ACTOR_ID}+${GITHUB_ACTOR}@users.noreply.github.com"
 
       - name: Create release branch
         if: ${{ inputs.dry_run == 'false' }}
