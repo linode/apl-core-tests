@@ -24,13 +24,15 @@ jobs:
   release-from-branch:
     permissions:
       contents: write
-      pull-requests: write
-    uses: ./.github/workflows/release-tag-from-branch.yml
+    uses: ./.github/workflows/release-software.yml
     with:
       release_branch: ${{ github.ref_name }}
       is_prerelease: ${{ inputs.is_prerelease == 'true' }}
       dry_run: ${{ inputs.dry_run == 'true' }}
-
+      container_registry: 'ghcr.io/linode/apl-core-tests'
+      oci_username: 'linode'
+    secrets:
+      oci_password: ${{ secrets.DOCKER_PASSWORD }}
   release-chart:
     needs: release-from-branch
     permissions:

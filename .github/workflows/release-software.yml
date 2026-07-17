@@ -15,6 +15,29 @@ on:
         description: 'Skip all writes (tag, release, and Docker push)'
         required: true
         type: boolean
+      release_branch_prefix:
+        description: 'Prefix required for release branches'
+        required: false
+        default: 'releases/'
+        type: string
+      release_tag_prefix:
+        description: 'Prefix to add to release tags'
+        required: false
+        default: 'v'
+        type: string
+      container_registry:
+        description: 'Container repository to push release images to'
+        required: true
+        type: string
+      oci_username:
+        description: 'Username used to authenticate to the container registry'
+        required: true
+        type: string
+    secrets:
+      oci_password:
+        description: 'Password or token used to authenticate to the container registry'
+        required: true
+
     outputs:
       release_tag:
         description: 'Computed release tag'
@@ -22,12 +45,12 @@ on:
 
 env:
   RELEASE_BRANCH: ${{ inputs.release_branch }}
-  RELEASE_BRANCH_PREFIX: 'releases/'
-  RELEASE_TAG_PREFIX: 'v'
-  REPO: ghcr.io/linode/apl-core-tests
-  LOCAL_CACHE_IMAGE: apl-core-tests:ci-build
-  DOCKER_USERNAME: linode
-  DOCKER_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+  RELEASE_BRANCH_PREFIX: ${{ inputs.release_branch_prefix }}
+  RELEASE_TAG_PREFIX: ${{ inputs.release_tag_prefix }}
+  CONTAINER_REGISTRY: ${{ inputs.container_registry }}
+  OCI_USERNAME: ${{ inputs.oci_username }}
+  OCI_PASSWORD: ${{ secrets.oci_password }}
+  LOCAL_CACHE_IMAGE: cache:ci-build
 
 jobs:
   release-software:
@@ -36,7 +59,6 @@ jobs:
       release_tag: ${{ steps.compute-tag.outputs.tag }}
     permissions:
       contents: write
-      pull-requests: write
 
     steps:
       - name: Checkout
@@ -116,8 +138,8 @@ jobs:
       #   if: ${{ !inputs.dry_run }}
       #   uses: docker/login-action@v4
       #   with:
-      #     username: ${{ env.DOCKER_USERNAME }}
-      #     password: ${{ env.DOCKER_PASSWORD }}
+      #     username: ${{ env.OCI_USERNAME }}
+      #     password: ${{ env.OCI_PASSWORD }}
 
       # - name: Push Docker image with release tag
       #   working-directory: ci
@@ -125,7 +147,7 @@ jobs:
       #   env:
       #     RELEASE_TAG: ${{ steps.compute-tag.outputs.tag }}
       #     CACHE_IMAGE: ${{ env.LOCAL_CACHE_IMAGE }}
-      #     DOCKER_REPO: ${{ env.REPO }}
+      #     DOCKER_REPO: ${{ env.CONTAINER_REGISTRY }}
       #     DRY_RUN: ${{ inputs.dry_run }}
 
       - name: Create GitHub Release
