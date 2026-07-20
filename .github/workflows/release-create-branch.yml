@@ -23,11 +23,8 @@ on:
       dry_run:
         description: 'Dry run — skip all writes (git push)'
         required: true
-        default: 'true'
-        type: choice
-        options:
-          - 'true'
-          - 'false'
+        default: true
+        type: boolean
 
 env:
   RELEASE_BRANCH_PREFIX: ${{ inputs.release_branch_prefix }}
