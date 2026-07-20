@@ -38,6 +38,7 @@ jobs:
       - validate-deps
     permissions:
       contents: write
+      packages: write
     uses: linode/apl-gh-actions/.github/workflows/release-software.yml@main
     with:
       release_branch: ${{ github.ref_name }}
