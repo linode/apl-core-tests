@@ -1,4 +1,4 @@
-name: Release from Branch
+name: Release from branch
 
 on:
   workflow_dispatch:
